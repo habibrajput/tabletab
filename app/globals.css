@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* One knob for the whole app's corner radius (1 = default, lower = sharper). */
+@theme {
+  --radius-scale: 1;
+  --radius-sm: calc(0.25rem * var(--radius-scale));
+  --radius-md: calc(0.375rem * var(--radius-scale));
+  --radius-lg: calc(0.5rem * var(--radius-scale));
+  --radius-xl: calc(0.75rem * var(--radius-scale));
+  --radius-2xl: calc(1rem * var(--radius-scale));
+  --radius-3xl: calc(1.5rem * var(--radius-scale));
+}
+
+/*
+  TableTap design-system tokens. Brand colours live as runtime CSS variables so
+  they're easy to re-theme — the whole palette flows from `--brand` + `--accent`.
+  (Swap these hex values to rebrand; the client will send exact colour codes.)
+*/
+@layer base {
+  :root {
+    --brand: #0f766e;
+    --brand-hover: #0d9488;
+    --brand-deep: #115e59;
+    --brand-tint: #eefdfa;
+    --brand-foreground: #ffffff;
+    --accent: #f59e0b;
+    --accent-tint: #fffbeb;
+  }
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+  --color-primary: var(--brand);
+  --color-primary-foreground: var(--brand-foreground);
+  --color-ring: var(--brand);
+}
+
+@theme {
+  /* Neutrals */
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-surface: #ffffff;
+  --color-subtle: #f8fafc;
+  --color-line: #e2e8f0;
+
+  /* Semantic aliases (shadcn-compatible) */
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-ink);
+  --color-secondary: var(--color-subtle);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted-foreground: var(--color-muted);
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-line);
+  --color-input: var(--color-line);
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --shadow-elevated: 0 8px 24px -6px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.08);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-primary-foreground);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
