@@ -25,7 +25,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
-# The container always listens on 3000; the host port is mapped in compose (.env).
+# PORT is overridden by compose (from APP_PORT); this is just the fallback for a bare `docker build`.
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 EXPOSE 3000

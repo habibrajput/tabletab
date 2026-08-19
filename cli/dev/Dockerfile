@@ -11,6 +11,7 @@ RUN npm ci
 
 COPY . .
 
+# PORT is overridden by compose (from APP_PORT); this is just the fallback for a bare `docker build`.
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
