@@ -1,7 +1,7 @@
 # Deploy — Hetzner + Cloudflare + Namecheap
 
 The site runs in Docker on the Hetzner VPS. The container always listens on
-**3000**; the **host port** comes from `.env.production` (`APP_PORT`), so it
+**3000**; the **host port** comes from `.env` (`APP_PORT`), so it
 never clashes with the other projects on the box. Cloudflare fronts DNS and TLS;
 nginx on the VPS routes the domain to `APP_PORT`.
 
@@ -33,7 +33,7 @@ the problem is Cloudflare or the firewall, not the app.**
 
 ```bash
 git clone https://github.com/habibrajput/tabletab.git && cd tabletab
-cp .env.example .env.production   # set APP_PORT to a free port, e.g. APP_PORT=3007
+cp .env.example .env   # set APP_PORT to a free port, e.g. APP_PORT=3007
 cp .env.example .env.development  # only if you'll run the dev container too
 
 ./cli/docker.sh prod-up      # build + start production (detached)
@@ -137,7 +137,7 @@ Network → Wi-Fi → Details → DNS), or just wait it out.
 sudo ./cli/nginx.sh tabletab.co
 ```
 
-That script does the whole section: reads `APP_PORT` from `.env.production`,
+That script does the whole section: reads `APP_PORT` from `.env`,
 refuses to continue unless the container is answering, installs nginx if it is
 missing, renders `cli/nginx/default.conf.template`, removes the `default` site
 (it silently shadows port 80), refreshes Cloudflare's IP ranges so logs show
@@ -166,7 +166,7 @@ and it is also what lets one VPS host several projects on one IP.
 
 ### Changing the port later
 
-Edit `APP_PORT` in `.env.production`, then:
+Edit `APP_PORT` in `.env`, then:
 
 ```bash
 ./cli/docker.sh prod-up

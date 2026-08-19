@@ -3,7 +3,7 @@
 #
 #   sudo ./cli/nginx.sh tabletab.co
 #
-# Reads APP_PORT from .env.production, renders cli/nginx/default.conf.template,
+# Reads APP_PORT from .env, renders cli/nginx/default.conf.template,
 # installs it, validates the config, and reloads nginx. Safe to re-run.
 set -euo pipefail
 
@@ -20,12 +20,12 @@ TEMPLATE="$ROOT/cli/nginx/default.conf.template"
 
 # --- port ---------------------------------------------------------------
 APP_PORT=3000
-if [ -f "$ROOT/.env.production" ]; then
+if [ -f "$ROOT/.env" ]; then
   # shellcheck disable=SC2046
-  APP_PORT="$(grep -E '^APP_PORT=' "$ROOT/.env.production" | tail -1 | cut -d= -f2 | tr -d '[:space:]')"
+  APP_PORT="$(grep -E '^APP_PORT=' "$ROOT/.env" | tail -1 | cut -d= -f2 | tr -d '[:space:]')"
   APP_PORT="${APP_PORT:-3000}"
 else
-  echo "!! no .env.production found — assuming APP_PORT=$APP_PORT"
+  echo "!! no .env found — assuming APP_PORT=$APP_PORT"
 fi
 echo "==> domain=$DOMAIN  APP_PORT=$APP_PORT"
 

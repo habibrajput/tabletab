@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.." || exit 1
 # (Uses Compose v2 `docker compose`; swap to `docker-compose` if your host has v1.)
 # Dev uses a single .env (same file Next.js loads); prod keeps its own secrets.
 DEV="docker compose -f cli/dev/docker-compose.yml --env-file .env"
-PROD="docker compose -f cli/production/docker-compose.yml --env-file .env.production"
+PROD="docker compose -f cli/production/docker-compose.yml --env-file .env"
 
 show_help() {
     echo "Usage: ./cli/docker.sh [command]"
