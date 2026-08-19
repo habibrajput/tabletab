@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../tabletab-api"
+		},
+		{
+			"path": "../../tabletab-client"
+		}
+	],
+	"settings": {}
+}
