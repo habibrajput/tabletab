@@ -33,5 +33,5 @@ yarn-error.log*
 !.vscode/extensions.json
 .idea
 
-#claud
-.claud
+# claude code (machine-local config)
+.claude/
