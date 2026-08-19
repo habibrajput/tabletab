@@ -30,6 +30,9 @@ show_help() {
     echo "  clean-all      - Stop and remove all containers, networks, volumes"
     echo "  status         - Show status of all containers"
     echo ""
+    echo "Reverse proxy (VPS only):"
+    echo "  sudo ./cli/nginx.sh <domain>   - Point a domain at this container"
+    echo ""
 }
 
 case "$1" in
