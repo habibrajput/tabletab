@@ -1,0 +1,15 @@
+# Production — run on the Hetzner VPS.
+#   cd cli/production && docker compose up -d --build
+# The host port comes from the repo-root .env (APP_PORT), so you can pick a free
+# port on a VPS that already hosts other projects.
+name: tabletab
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: cli/production/Dockerfile
+    image: tabletap-site:latest
+    container_name: tabletap-site
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"

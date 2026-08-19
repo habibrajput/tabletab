@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone, Sparkles } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 
 import { Reveal } from "../_components/motion";
 import { ContactForm } from "../_components/contact-form";
@@ -28,10 +28,7 @@ export default function ContactPage() {
         />
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 md:py-20">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-              <Sparkles className="size-3.5 text-brand" aria-hidden /> Contact us
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink text-balance sm:text-5xl">
+            <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink text-balance sm:text-5xl">
               Let&rsquo;s talk about your restaurant
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">

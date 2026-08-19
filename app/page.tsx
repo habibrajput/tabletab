@@ -40,11 +40,7 @@ function Hero() {
       />
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
         <Reveal y={24}>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-            <span className="size-1.5 animate-pulse rounded-full bg-brand" aria-hidden />
-            The all-in-one restaurant platform
-          </span>
-          <h1 className="mt-5 font-display text-4xl font-bold leading-[1.08] tracking-tight text-ink text-balance sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-ink text-balance sm:text-5xl lg:text-6xl">
             Run your whole restaurant from one place.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">

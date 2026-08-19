@@ -1,14 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowRight,
-  HeartHandshake,
-  PhoneCall,
-  Rocket,
-  ShieldCheck,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, HeartHandshake, PhoneCall, Rocket, ShieldCheck, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CountUp, Reveal, RevealGroup, RevealItem } from "../_components/motion";
@@ -61,10 +53,7 @@ export default function AboutPage() {
         />
         <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 md:py-28">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-              <Sparkles className="size-3.5 text-brand" aria-hidden /> Our story
-            </span>
-            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink text-balance sm:text-5xl">
+            <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-ink text-balance sm:text-5xl">
               Built by restaurant people, for restaurant people
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
