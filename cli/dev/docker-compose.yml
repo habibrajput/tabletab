@@ -1,14 +1,14 @@
 # Dev — hot-reloading container.
 #   cd cli/dev && docker compose up --build
 # Source is bind-mounted for live reload; node_modules stays inside the container.
-name: tabletab-dev
+name: tabletab
 services:
   web:
     build:
       context: ../..
       dockerfile: cli/dev/Dockerfile
-    image: tabletap-site-dev:latest
-    container_name: tabletap-site-dev
+    image: tabletab:latest
+    container_name: tabletab
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3000}:3000"

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Dev image — runs `next dev` with hot reload (source is bind-mounted by compose).
-# Build from the repo root:  docker build -f cli/dev/Dockerfile -t tabletap-site-dev .
+# Build from the repo root:  docker build -f cli/dev/Dockerfile -t tabletab .
 
 FROM node:20-alpine
 WORKDIR /app

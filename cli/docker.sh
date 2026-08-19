@@ -43,7 +43,7 @@ case "$1" in
         ;;
     dev-logs)
         echo "Viewing development logs (press Ctrl+C to exit)..."
-        docker logs tabletap-site-dev -f
+        docker logs tabletab -f
         ;;
     dev-restart)
         echo "Restarting development environment..."
@@ -55,7 +55,7 @@ case "$1" in
         ;;
     dev-connect)
         echo "Connecting to development container..."
-        docker exec -it tabletap-site-dev sh
+        docker exec -it tabletab sh
         ;;
     prod-up)
         echo "Starting production environment..."
