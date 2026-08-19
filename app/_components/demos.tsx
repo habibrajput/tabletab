@@ -417,7 +417,7 @@ export function QrDemo() {
         <div className="overflow-hidden rounded-[1.7rem] bg-surface">
           <div className="flex items-center justify-between bg-brand px-4 py-2 text-brand-foreground">
             <span className="flex items-center gap-1.5 text-[11px] font-semibold">
-              <Utensils className="size-3.5" aria-hidden /> Renala Branch · Table 6
+              <Utensils className="size-3.5" aria-hidden /> River Side Inn · Table 6
             </span>
             <ScanLine className="size-3.5" aria-hidden />
           </div>
@@ -501,7 +501,7 @@ export function StorefrontDemo() {
         <span className="size-2 rounded-full bg-amber-300" />
         <span className="size-2 rounded-full bg-emerald-300" />
         <span className="ml-2 flex-1 truncate rounded-md bg-subtle px-2 py-0.5 text-[9px] text-muted-foreground">
-          yourbrand.tabletap.app
+          yourbrand.tabletab.app
         </span>
       </div>
       <div className="rounded-xl border border-border bg-subtle/50 p-2.5">

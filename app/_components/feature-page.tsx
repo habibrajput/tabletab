@@ -13,7 +13,7 @@ export function featureMetadata(slug: string): Metadata {
   const f = getFeature(slug);
   if (!f) return {};
   return {
-    title: `${f.name} — TableTap`,
+    title: `${f.name} — tabletab`,
     description: f.tagline,
   };
 }

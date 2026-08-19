@@ -1,6 +1,6 @@
-# TableTap — Marketing Site
+# tabletab — Marketing Site
 
-The public marketing website for TableTap, the all-in-one restaurant platform. A
+The public marketing website for tabletab, the all-in-one restaurant platform. A
 standalone Next.js app that showcases every feature and role, with a dedicated
 page per feature.
 

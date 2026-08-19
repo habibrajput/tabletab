@@ -16,7 +16,7 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "TableTap — Run your whole restaurant from one place",
+  title: "tabletab — Run your whole restaurant from one place",
   description:
     "POS, QR dine-in ordering, online storefront, reservations, kitchen display and live analytics — one platform for single sites and multi-branch groups.",
 };

@@ -1,8 +1,8 @@
 {
-  "name": "tabletap-site",
+  "name": "tabletab-site",
   "version": "0.1.0",
   "private": true,
-  "description": "TableTap marketing website — the public showcase for the platform.",
+  "description": "tabletab marketing website — the public showcase for the platform.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

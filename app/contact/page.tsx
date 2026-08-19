@@ -5,13 +5,13 @@ import { Reveal } from "../_components/motion";
 import { ContactForm } from "../_components/contact-form";
 
 export const metadata: Metadata = {
-  title: "Contact Us — TableTap",
+  title: "Contact Us — tabletab",
   description:
-    "Talk to the TableTap team about your restaurant — sales, onboarding or support. We reply within one business day.",
+    "Talk to the tabletab team about your restaurant — sales, onboarding or support. We reply within one business day.",
 };
 
 const DETAILS = [
-  { icon: Mail, label: "Email", value: "hello@tabletap.app", href: "mailto:hello@tabletap.app" },
+  { icon: Mail, label: "Email", value: "hello@tabletab.app", href: "mailto:hello@tabletab.app" },
   { icon: Phone, label: "Phone", value: "+1 (555) 010-2040", href: "tel:+15550102040" },
   { icon: MapPin, label: "Office", value: "128 Market Street, Suite 400" },
   { icon: Clock, label: "Hours", value: "Mon–Fri · 9am–6pm" },

@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "../../../tabletab-client"
+		},
+		{
+			"path": "../../../tabletab-console-api"
+		},
+		{
+			"path": "../../../tabletab-console-app"
 		}
 	],
 	"settings": {}

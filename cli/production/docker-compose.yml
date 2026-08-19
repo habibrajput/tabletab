@@ -8,8 +8,8 @@ services:
     build:
       context: ../..
       dockerfile: cli/production/Dockerfile
-    image: tabletap-site:latest
-    container_name: tabletap-site
+    image: tabletab-site:latest
+    container_name: tabletab-site
     restart: unless-stopped
     environment:
       - PORT=${APP_PORT:-3000}

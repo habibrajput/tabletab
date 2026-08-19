@@ -5,11 +5,11 @@ import { MainNav } from "./main-nav";
 
 export function Wordmark() {
   return (
-    <Link href="/" className="flex items-center gap-2" aria-label="TableTap home">
+    <Link href="/" className="flex items-center gap-2" aria-label="tabletab home">
       <span className="flex size-8 items-center justify-center rounded-xl bg-brand text-brand-foreground shadow-sm">
         <UtensilsCrossed className="size-5" aria-hidden />
       </span>
-      <span className="font-display text-lg font-bold tracking-tight text-ink">TableTap</span>
+      <span className="font-display text-lg font-bold tracking-tight text-ink">tabletab</span>
     </Link>
   );
 }
@@ -47,7 +47,7 @@ export function SiteFooter() {
             Contact Us
           </Link>
         </nav>
-        <p>&copy; {new Date().getFullYear()} TableTap</p>
+        <p>&copy; {new Date().getFullYear()} tabletab</p>
       </div>
     </footer>
   );

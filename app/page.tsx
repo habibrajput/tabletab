@@ -9,7 +9,7 @@ import { FeatureGrid, MoreFeatures, RolesSection, WorkflowStrip } from "./_compo
 import { BOOK_A_CALL_URL } from "./_components/site-config";
 
 export const metadata: Metadata = {
-  title: "TableTap — Run your whole restaurant from one place",
+  title: "Tabletab — Run your whole restaurant from one place",
   description:
     "POS, QR dine-in ordering, online storefront, reservations, kitchen display and live analytics — one platform for single sites and multi-branch groups.",
 };
@@ -44,7 +44,7 @@ function Hero() {
             Run your whole restaurant from one place.
           </h1>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            TableTap brings your point-of-sale, QR dine-in ordering, online storefront, bookings,
+            tabletab brings your point-of-sale, QR dine-in ordering, online storefront, bookings,
             kitchen display and live analytics together — so every order lands in the right place,
             automatically.
           </p>

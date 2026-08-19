@@ -7,9 +7,9 @@ import { CountUp, Reveal, RevealGroup, RevealItem } from "../_components/motion"
 import { BOOK_A_CALL_URL } from "../_components/site-config";
 
 export const metadata: Metadata = {
-  title: "About Us — TableTap",
+  title: "About Us — tabletab",
   description:
-    "TableTap is the all-in-one platform built by restaurant people, for restaurant people — one connected system for the whole operation.",
+    "tabletab is the all-in-one platform built by restaurant people, for restaurant people — one connected system for the whole operation.",
 };
 
 const VALUES = [
@@ -58,7 +58,7 @@ export default function AboutPage() {
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               We spent years watching great kitchens fight their own tools — a POS here, a booking
-              app there, spreadsheets everywhere. TableTap is the system we wished we&rsquo;d had:
+              app there, spreadsheets everywhere. tabletab is the system we wished we&rsquo;d had:
               one platform that runs the whole restaurant, from the first tap to the final report.
             </p>
           </Reveal>
@@ -81,7 +81,7 @@ export default function AboutPage() {
               only show up a week too late.
             </p>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              We built TableTap so a single change — a new price, a sold-out dish, a new branch —
+              We built tabletab so a single change — a new price, a sold-out dish, a new branch —
               flows everywhere at once: the POS, the QR menu, your storefront and the kitchen line.
               One source of truth, updated live, for everyone who needs it.
             </p>

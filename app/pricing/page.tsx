@@ -8,7 +8,7 @@ import { BOOK_A_CALL_URL } from "../_components/site-config";
 import { Reveal, RevealGroup, RevealItem } from "../_components/motion";
 
 export const metadata: Metadata = {
-  title: "Pricing — TableTap",
+  title: "Pricing — tabletab",
   description:
     "Simple, transparent pricing that scales from a single café to a multi-branch group. Start free, no card required.",
 };
@@ -71,7 +71,7 @@ const FAQ = [
   },
   {
     q: "Does it work on my hardware?",
-    a: "Yes — TableTap runs in the browser on the tablets, phones and laptops you already own. No proprietary hardware, no lock-in.",
+    a: "Yes — tabletab runs in the browser on the tablets, phones and laptops you already own. No proprietary hardware, no lock-in.",
   },
   {
     q: "How is a branch counted?",

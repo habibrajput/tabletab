@@ -59,7 +59,7 @@ const NAV: { section: string; items: { name: string; icon: LucideIcon }[] }[] = 
 ];
 
 /**
- * A faithful miniature of the real TableTap admin: an icon-rail sidebar (grouped
+ * A faithful miniature of the real tabletab admin: an icon-rail sidebar (grouped
  * like the live nav) + a topbar with the branch switcher and account, wrapping
  * the actual screen for each feature. `active` highlights the current nav item.
  */
@@ -115,7 +115,7 @@ export function AdminChrome({
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3">
             <span className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2 py-1 text-[11px] font-medium text-ink">
               <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-              Renala Branch
+              River Side Inn
               <ChevronDown className="size-3 text-muted-foreground" aria-hidden />
             </span>
             <div className="flex items-center gap-2">

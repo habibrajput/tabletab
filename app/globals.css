@@ -13,7 +13,7 @@
 }
 
 /*
-  TableTap design-system tokens. Brand colours live as runtime CSS variables so
+  tabletab design-system tokens. Brand colours live as runtime CSS variables so
   they're easy to re-theme — the whole palette flows from `--brand` + `--accent`.
   (Swap these hex values to rebrand; the client will send exact colour codes.)
 */

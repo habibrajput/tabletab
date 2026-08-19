@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Production image — multi-stage build → tiny standalone Next.js server.
-# Build from the repo root:  docker build -f cli/production/Dockerfile -t tabletap-site .
+# Build from the repo root:  docker build -f cli/production/Dockerfile -t tabletab-site .
 
 FROM node:20-alpine AS deps
 WORKDIR /app

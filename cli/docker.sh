@@ -39,8 +39,12 @@ show_help() {
 case "$1" in
     dev-up)
         echo "Starting development environment..."
-        $DEV up -d --build
+        $DEV up -d
         ;;
+     dev-up-build)
+        echo "Starting development environment..."
+        $DEV up -d --build
+        ;;    
     dev-down)
         echo "Stopping development environment..."
         $DEV down
@@ -71,7 +75,7 @@ case "$1" in
         ;;
     prod-logs)
         echo "Viewing production logs (press Ctrl+C to exit)..."
-        docker logs tabletap-site -f
+        docker logs tabletab-site -f
         ;;
     prod-restart)
         echo "Restarting production environment..."
@@ -83,7 +87,7 @@ case "$1" in
         ;;
     prod-connect)
         echo "Connecting to production container..."
-        docker exec -it tabletap-site sh
+        docker exec -it tabletab-site sh
         ;;
     stop-all)
         echo "Stopping all environments..."
