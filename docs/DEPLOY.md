@@ -1,146 +1,247 @@
 # Deploy — Hetzner + Cloudflare + Namecheap
 
-The site runs in Docker on your Hetzner VPS. The container always listens on
-**3000**; the **host port** comes from the env file (`APP_PORT`), so it never
-clashes with the other projects on the box. Cloudflare fronts DNS/SSL; your
-reverse proxy routes the domain to `APP_PORT`.
+The site runs in Docker on the Hetzner VPS. The container always listens on
+**3000**; the **host port** comes from `.env.production` (`APP_PORT`), so it
+never clashes with the other projects on the box. Cloudflare fronts DNS and TLS;
+nginx on the VPS routes the domain to `APP_PORT`.
 
-## 1. Run it on the VPS
+```
+Namecheap ──NS──> Cloudflare ──:80/:443──> nginx ──> container (APP_PORT → 3000)
+(registrar)       (DNS + TLS + cache)      (VPS)
+```
+
+## Where each command runs
+
+This trips people up, so every code block below is labelled. In short:
+
+| Command                                | Run on   | Why                                        |
+| -------------------------------------- | -------- | ------------------------------------------ |
+| `dig ...`                              | your Mac | DNS is global — check from outside         |
+| `./cli/docker.sh ...`                  | the VPS  | that is where Docker runs                  |
+| `sudo ./cli/nginx.sh <domain>`         | the VPS  | configures nginx on the box                |
+| `curl -H 'Host: ...' http://127.0.0.1` | the VPS  | tests nginx→container, skipping Cloudflare |
+| `curl -I https://tabletab.co`          | your Mac | tests the whole chain                      |
+
+That last pair is the key debugging split: **VPS-local 200 + public 521 means
+the problem is Cloudflare or the firewall, not the app.**
+
+---
+
+## 1. Run the app on the VPS
+
+> Run on: **the VPS**
 
 ```bash
-git clone <your-repo> tabletab && cd tabletab
+git clone https://github.com/habibrajput/tabletab.git && cd tabletab
 cp .env.example .env.production   # set APP_PORT to a free port, e.g. APP_PORT=3007
-cp .env.example .env.development  # (only if you'll run the dev container too)
+cp .env.example .env.development  # only if you'll run the dev container too
 
-# everything goes through cli/docker.sh:
 ./cli/docker.sh prod-up      # build + start production (detached)
 ./cli/docker.sh status       # see what's running
 ./cli/docker.sh prod-logs    # follow logs
 ```
 
-The app is now on `http://<VPS_IP>:APP_PORT`. Update later with:
+Confirm it is actually serving before touching DNS or nginx:
 
 ```bash
-git pull && ./cli/docker.sh prod-up
+curl -I http://127.0.0.1:3007      # = APP_PORT; expect HTTP/1.1 200 OK
 ```
 
-Run `./cli/docker.sh` with no argument for the full command list.
+Update later with `git pull && ./cli/docker.sh prod-up`. Run `./cli/docker.sh`
+with no argument for the full command list.
 
-## 2. Namecheap → Cloudflare
+---
 
-1. In **Cloudflare** → _Add a site_ → enter your domain → Free plan. Cloudflare
-   shows **two nameservers** (e.g. `xxx.ns.cloudflare.com`).
-2. In **Namecheap** → _Domain List_ → _Manage_ → **Nameservers** → _Custom DNS_ →
-   paste Cloudflare's two nameservers → save. (Propagation: minutes to hours.)
+## 2. Point Namecheap at Cloudflare
 
-## 3. Cloudflare DNS + SSL
+> Run in: **the Cloudflare and Namecheap dashboards**
 
-### DNS records
+1. **Cloudflare** → _Add a site_ → enter `tabletab.co` → Free plan. Cloudflare
+   assigns **two nameservers**, e.g. `athena.ns.cloudflare.com` and
+   `austin.ns.cloudflare.com`.
+2. **Namecheap** → _Domain List_ → _Manage_ → **Nameservers** → switch _Basic
+   DNS_ to **Custom DNS** → paste both → save.
 
-Add **both** records — a missing `www` is the most common cause of
-`ERR_NAME_NOT_RESOLVED`, because DNS has no wildcard fallback: `example.com` and
-`www.example.com` are unrelated names and each needs its own record.
+Once nameservers are delegated, records at Namecheap are ignored — **all DNS now
+lives in Cloudflare**. If you use Namecheap Private Email, re-create the MX and
+SPF/DKIM records inside Cloudflare _before_ switching, or mail stops.
+
+Verify (run on **your Mac**):
+
+```bash
+dig +short NS tabletab.co     # → athena.ns.cloudflare.com, austin.ns.cloudflare.com
+```
+
+---
+
+## 3. Cloudflare DNS records
+
+> Run in: **the Cloudflare dashboard** → _DNS_ → _Records_
+
+Add **both** records. `tabletab.co` and `www.tabletab.co` are unrelated names in
+DNS — there is no wildcard fallback, so a missing `www` gives
+`ERR_NAME_NOT_RESOLVED` even when the apex works perfectly.
 
 | Type  | Name  | Content             | Proxy status     |
 | ----- | ----- | ------------------- | ---------------- |
 | A     | `@`   | your Hetzner VPS IP | Proxied (orange) |
-| CNAME | `www` | `example.com`       | Proxied (orange) |
+| CNAME | `www` | `tabletab.co`       | Proxied (orange) |
 
-Leave MX and SPF/DKIM TXT records on **DNS only** (grey cloud) — Cloudflare's
+Leave MX and SPF/DKIM TXT records on **DNS only** (grey cloud) — the Cloudflare
 proxy handles HTTP(S) only, and proxying mail records breaks email.
 
-Verify before moving on:
+### Verifying, and why `dig` may lie to you
+
+> Run on: **your Mac**
 
 ```bash
-dig +short example.com          # → Cloudflare anycast IPs (104.x / 172.67.x)
-dig +short www.example.com      # → the same; empty output means the record is missing
+dig +short tabletab.co
+dig +short www.tabletab.co
 ```
 
-### SSL/TLS encryption mode
+Both should return Cloudflare anycast IPs (`104.x` / `172.67.x`), **not** your
+VPS IP — that is what "Proxied" means. A proxied CNAME shows up as an A record;
+that is Cloudflare flattening it, not a mistake.
 
-The mode must match what your origin actually listens on, or Cloudflare cannot
-complete the second hop:
+If `www` comes back empty, check whether the record is actually missing or
+whether you are being served a **cached negative answer**:
+
+```bash
+dig +short www.tabletab.co @1.1.1.1                    # a public resolver
+dig +short www.tabletab.co @athena.ns.cloudflare.com   # your zone itself — never cached
+```
+
+If the authoritative nameserver answers but public resolvers do not, the record
+is fine and you just have to wait. Every resolver that looked the name up
+_before_ you created it cached "does not exist" for the zone's SOA minimum —
+**1800 seconds (30 minutes)** on Cloudflare. Flushing your local DNS cache does
+not help, because the stale answer lives upstream:
+
+```bash
+sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder   # macOS — local only
+```
+
+To see the site immediately, point your Mac at `1.1.1.1` (System Settings →
+Network → Wi-Fi → Details → DNS), or just wait it out.
+
+> **Lesson:** create DNS records _before_ you first test a hostname. One early
+> lookup against a name that does not exist yet costs you a 30-minute wait.
+
+---
+
+## 4. Put nginx in front of the container
+
+> Run on: **the VPS**
+
+```bash
+sudo ./cli/nginx.sh tabletab.co
+```
+
+That script does the whole section: reads `APP_PORT` from `.env.production`,
+refuses to continue unless the container is answering, installs nginx if it is
+missing, renders `cli/nginx/default.conf.template`, removes the `default` site
+(it silently shadows port 80), refreshes Cloudflare's IP ranges so logs show
+real visitor IPs, runs `nginx -t`, reloads, and finally proves nginx answers on
+:80 — exiting non-zero if it does not. Safe to re-run any time.
+
+Verify (still on the VPS):
+
+```bash
+curl -I -H 'Host: tabletab.co' http://127.0.0.1     # expect HTTP/1.1 200 OK
+```
+
+### Why a reverse proxy is needed at all
+
+A reasonable question: why not just point DNS at `VPS_IP:3000`?
+
+- **DNS maps a name to an IP address only.** There is no field for a port. A
+  browser visiting `tabletab.co` always lands on 443 (or 80).
+- **Cloudflare's proxy only connects to origins on a fixed port list:**
+  - HTTP: `80, 8080, 8880, 2052, 2082, 2086, 2095`
+  - HTTPS: `443, 2053, 2083, 2087, 2096, 8443`
+
+`APP_PORT` values like 3000 or 3007 appear on neither list, so the container can
+never be reached directly. nginx listening on 80/443 is what bridges the gap —
+and it is also what lets one VPS host several projects on one IP.
+
+### Changing the port later
+
+Edit `APP_PORT` in `.env.production`, then:
+
+```bash
+./cli/docker.sh prod-up
+sudo ./cli/nginx.sh tabletab.co    # re-renders nginx with the new port
+```
+
+---
+
+## 5. Cloudflare SSL/TLS mode
+
+> Run in: **the Cloudflare dashboard** → _SSL/TLS_ → _Overview_
+
+The mode must match what your origin actually listens on. **Full** and **Full
+(strict)** both make Cloudflare connect to the origin over **HTTPS on port
+443** — they are not "HTTP to the origin is fine" modes:
 
 | Origin (nginx) listens on                       | Correct mode      | Wrong mode gives         |
 | ----------------------------------------------- | ----------------- | ------------------------ |
-| `listen 80;` (HTTP only)                        | **Flexible**      | Full → **521**           |
+| `listen 80;` — what `cli/nginx.sh` installs     | **Flexible**      | Full → **521**           |
 | `listen 443 ssl;` with a Cloudflare Origin cert | **Full (strict)** | Flexible → redirect loop |
 
-**Full** and **Full (strict)** both make Cloudflare connect to the origin over
-**HTTPS on port 443** — they are not "HTTP is fine" modes. Start on Flexible to
-get the site up, then move to Full (strict) once the Origin certificate is
-installed (section 4).
+To change it:
 
-## 4. Route the domain to the container (reverse proxy)
+1. Click the blue **Configure** button, top-right of the SSL/TLS page.
+2. Choose **Custom SSL/TLS** — the _Automatic SSL/TLS_ option picks a mode for
+   you and will not let you force Flexible.
+3. Select **Flexible** → **Save**. It takes effect within seconds; no restart or
+   cache purge needed.
 
-> **Quick path:** `sudo ./cli/nginx.sh tabletab.co` does everything in
-> this section — reads `APP_PORT` from `.env.production`, renders
-> `cli/nginx/default.conf.template`, installs the site, refreshes the Cloudflare IP
-> list for real client IPs, runs `nginx -t` and reloads. Safe to re-run.
-> Then set Cloudflare SSL/TLS mode to **Flexible**. The rest of this section
-> explains what it does and how to move to Full (strict).
+Then load `https://tabletab.co` and `https://www.tabletab.co`.
 
-Cloudflare hits your VPS on 80/443. Since the box hosts several projects, a
-reverse proxy maps each domain to its container's `APP_PORT`. Example **nginx**
-(`/etc/nginx/sites-available/tabletap`):
+### Also turn on
 
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+_SSL/TLS_ → _Edge Certificates_:
 
-    location / {
-        proxy_pass http://127.0.0.1:3007;   # = APP_PORT from .env.production
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+- **Always Use HTTPS** — On. Redirects plain-HTTP hits at the edge.
+- **Automatic HTTPS Rewrites** — On.
+- Minimum TLS Version — 1.2.
 
-```bash
-ln -s /etc/nginx/sites-available/tabletap /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
-```
+_Speed_ → _Optimization_:
 
-### Why a reverse proxy is required at all
+- **Rocket Loader** — **Off**. It reorders script execution and breaks React
+  hydration.
+- JS **auto-minify** — Off, for the same reason.
 
-DNS maps a name to an **IP address only** — there is no field for a port, so a
-browser visiting `example.com` always lands on 443 (or 80). On top of that,
-Cloudflare's proxy will only connect to an origin on a fixed set of ports:
+---
 
-- HTTP: `80, 8080, 8880, 2052, 2082, 2086, 2095`
-- HTTPS: `443, 2053, 2083, 2087, 2096, 8443`
+## 6. Hardening (after the site is confirmed up)
 
-`APP_PORT` values like 3000/3007 are not on that list, so the container can never
-be reached directly. nginx on 80/443 is what bridges the gap.
+### Encrypt the Cloudflare→VPS hop (Flexible → Full strict)
 
-### Upgrading to Full (strict)
-
-The `listen 80;` block above pairs with SSL mode **Flexible** — the
-Cloudflare→VPS hop is plain HTTP. To encrypt it, create a free
+Flexible leaves that hop as plain HTTP. To fix it, get a free
 [Cloudflare Origin Certificate](https://developers.cloudflare.com/ssl/origin-configuration/origin-ca/)
-(SSL/TLS → Origin Server → Create Certificate, 15-year validity), install it, and
-switch the mode to **Full (strict)**:
+— _SSL/TLS_ → _Origin Server_ → _Create Certificate_, hostnames
+`tabletab.co, *.tabletab.co`, 15-year validity — and install it on the VPS:
 
 ```bash
 sudo install -d -m 750 /etc/ssl/cf
-sudo nano /etc/ssl/cf/origin.pem   # certificate     (chmod 644)
-sudo nano /etc/ssl/cf/origin.key   # private key     (chmod 600)
+sudo nano /etc/ssl/cf/origin.pem   # the certificate  (chmod 644)
+sudo nano /etc/ssl/cf/origin.key   # the private key  (chmod 600)
 ```
+
+Add a TLS server block alongside the generated one:
 
 ```nginx
 server {
     listen 443 ssl;
     http2 on;
-    server_name example.com www.example.com;
+    server_name tabletab.co www.tabletab.co;
 
     ssl_certificate     /etc/ssl/cf/origin.pem;
     ssl_certificate_key /etc/ssl/cf/origin.key;
 
     location / {
-        proxy_pass http://127.0.0.1:3007;
+        proxy_pass http://127.0.0.1:3007;          # = APP_PORT
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $http_cf_connecting_ip;
         proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
@@ -150,56 +251,78 @@ server {
 
 server {
     listen 80;
-    server_name example.com www.example.com;
+    server_name tabletab.co www.tabletab.co;
     return 301 https://$host$request_uri;
 }
 ```
 
-Note `$http_cf_connecting_ip` rather than `$remote_addr`: behind Cloudflare,
-`$remote_addr` is always a Cloudflare edge IP, so logs and any rate limiting see
-the proxy instead of the visitor.
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
 
-### Lock the container to loopback
+Then set the Cloudflare mode to **Full (strict)**. Prefer it over plain Full,
+which accepts any certificate the origin presents — including a forged one.
+
+Note `$http_cf_connecting_ip` rather than `$remote_addr`: behind Cloudflare,
+`$remote_addr` is always a Cloudflare edge IP, so logs and rate limiting would
+otherwise see the proxy instead of the visitor.
+
+### Stop the container answering publicly
 
 `cli/production/docker-compose.yml` publishes `"${APP_PORT}:3000"`, which binds
-every interface — so `http://<VPS_IP>:3007` answers publicly and bypasses
-Cloudflare entirely. Once nginx is in front, change it to bind loopback only:
+every interface — `http://<VPS_IP>:3007` answers directly and bypasses
+Cloudflare, TLS and any WAF rules. Bind it to loopback instead:
 
 ```yaml
 ports:
   - "127.0.0.1:${APP_PORT:-3000}:3000"
 ```
 
-For the same reason, restrict inbound 80/443 to
-[Cloudflare's IP ranges](https://www.cloudflare.com/ips/) in the Hetzner Cloud
-Firewall, and 22 to your own IP.
+Then `./cli/docker.sh prod-up`. nginx proxies to `127.0.0.1`, so nothing breaks.
+
+### Firewall
+
+In the **Hetzner Cloud Firewall** (in front of the NIC, so stronger than ufw):
+
+| Direction | Port       | Source                                                  |
+| --------- | ---------- | ------------------------------------------------------- |
+| inbound   | 22/tcp     | your IP only                                            |
+| inbound   | 80,443/tcp | [Cloudflare IP ranges](https://www.cloudflare.com/ips/) |
+
+Without this, anyone who learns the origin IP can skip Cloudflare entirely.
 
 ### Alternative: Cloudflare Tunnel (no open ports)
 
-Run `cloudflared` and point a tunnel at `http://localhost:APP_PORT`. Cloudflare
-creates the DNS record and no VPS firewall ports need opening.
+Run `cloudflared` pointed at `http://localhost:APP_PORT`. Cloudflare creates the
+DNS record, the origin dials out, and no inbound ports need opening at all.
 
-## Changing the port later
-
-Edit `.env.production` (`APP_PORT=...`), update the nginx `proxy_pass` to match,
-then `./cli/docker.sh prod-up` and `systemctl reload nginx`. No code changes.
+---
 
 ## Troubleshooting
 
 | Symptom                                 | Cause                                                                               |
 | --------------------------------------- | ----------------------------------------------------------------------------------- |
-| `ERR_NAME_NOT_RESOLVED` on `www.`       | No `www` record in Cloudflare DNS — see section 3                                   |
+| `ERR_NAME_NOT_RESOLVED` on `www.`       | No `www` record — or a cached negative answer; see section 3                        |
 | **521** Web server is down              | SSL mode Full/Full (strict) while nginx only listens on 80; or nginx/container down |
 | **522** Connection timed out            | Firewall blocking Cloudflare on 80/443                                              |
 | **526** Invalid SSL certificate         | Full (strict) against a self-signed cert — use the Cloudflare Origin cert           |
 | `ERR_TOO_MANY_REDIRECTS`                | Flexible mode while nginx also redirects to HTTPS                                   |
-| **502** from nginx                      | `proxy_pass` port ≠ `APP_PORT` in `.env.production`                                 |
+| nginx welcome page instead of the site  | The `default` site is shadowing port 80 — re-run `sudo ./cli/nginx.sh tabletab.co`  |
+| **502** from nginx                      | `proxy_pass` port ≠ `APP_PORT`; re-run `cli/nginx.sh`                               |
 | Hydration errors in the browser console | Cloudflare **Rocket Loader** or JS auto-minify enabled — turn both off              |
 | Every visitor logged as one IP          | Using `$remote_addr` instead of `$http_cf_connecting_ip`                            |
 
+Work outwards from the container — the first command that fails tells you which
+layer is broken:
+
 ```bash
-curl -I https://example.com                    # expect: server: cloudflare
-curl -I http://127.0.0.1:3007                  # on the VPS: is the container answering?
-docker logs tabletab-site --tail 50            # app-side errors
-sudo tail -n 50 /var/log/nginx/error.log       # proxy-side errors
+# on the VPS
+curl -I http://127.0.0.1:3007                    # 1. container alive?
+curl -I -H 'Host: tabletab.co' http://127.0.0.1  # 2. nginx → container?
+docker logs tabletab-site --tail 50              # app errors
+sudo tail -n 50 /var/log/nginx/error.log         # proxy errors
+
+# on your Mac
+dig +short www.tabletab.co                       # 3. DNS resolving?
+curl -I https://tabletab.co                      # 4. full chain — expect server: cloudflare
 ```
